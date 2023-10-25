@@ -2,29 +2,40 @@ import { useEffect, useState } from "react";
 import { Interface } from "readline";
 
 interface Company {
-  International: string,
-  Code: string,
+  International: string;
+  Code: string;
   Name: string
 }
 
 
 interface ThemeColor {
   // 중첩 객체에서는 번호가 아니라 배열 대괄호의 이름임 ex themeColor['blue'].text 이런 방식이라 배열이기 때문에 key값이 string이다.
-    // 중첩 객체에서는 index값을 못씀 
-[key:string] : {
-  back:string
-  hover:string
-  active:string
-  text:string
+  // 중첩 객체에서는 index값을 못씀 
+  [key: string]: {
+    back: string;
+    hover: string;
+    active: string;
+    text: string;
+    outline: string;
+
+  }
 
 }
+
+
+
+
+interface ButtonType {
+  name: string;
+  theme: string;
+
 
 }
 
 function App() {
   // const [test, setTest] = useState<string>();
   //모든데이터
-  const [allCarriers, setAllCarriers] = useState<Company>();
+  const [allCarriers, setAllCarriers] = useState<Company[]>([]);
   // 필터되는 데이터
   const [carriers, setCarriers] = useState<Company[]>([]);
   const [theme, setTheme] = useState<string>('default');
@@ -34,34 +45,139 @@ function App() {
   const [tinvoice, setTinvoice] = useState<string>('');
   //택배사 이름
   const [tname, setTname] = useState<string>('CJ대한통운');
+  const [isBtn, setIsBtn] = useState<number | null>(null);
+  const [infoTracking, setInfoTracking] = useState<string>();
 
-  const themeColor : ThemeColor = {
+  const themeColor: ThemeColor = {
     "default": {
       "back": "bg-indigo-500",
       "hover": "hover:bg-indigo-300",
-      "active" : "bg-indigo-400",
-      "text" : "text-indigo-500"
+      "active": "bg-indigo-400",
+      "text": "text-indigo-500",
+      "outline" : "outline-indigo-300"
     },
     "orange": {
       "back": "bg-orange-500",
       "hover": "hover:bg-orange-300",
-      "active" : "bg-orange-400",
-      "text" : "text-orange-500"
+      "active": "bg-orange-400",
+      "text": "text-orange-500",
+      "outline" : "outline-orange-300"
     },
     "blue": {
       "back": "bg-blue-500",
       "hover": "hover:bg-blue-300",
-      "active" : "bg-blue-400",
-      "text" : "text-blue-500"
+      "active": "bg-blue-400",
+      "text": "text-blue-500",
+      "outline" : "outline-blue-300"
     }
   }
 
+  const buttons: ButtonType[] = [
+    { name: "기본", theme: "default" },
+    { name: "오렌지", theme: "orange" },
+    { name: "블루", theme: "blue" }
+  ]
+  useEffect(()=>{
+    
+    const fetchData = async ()=>{
+      try{
+        const res = await fetch(`http://info.sweettracker.co.kr/api/v1/companylist?t_key=${process.env.REACT_APP_API_KEY}`);
+        const data = await res.json();
+        setAllCarriers(data.Company)
+        setCarriers(data.Company)
+        }catch(error){
+          console.log(error);
+        }
+      }
+      fetchData();
+  },[])
 
+  const selectCode = (BtnNumber: number, code: string, name:string) =>{
+    // 국내가 false라 2번을 넘김
+    setIsBtn(BtnNumber);
+    setTcode(code);
+    setTname(name);
+    const isInternational = BtnNumber === 2 ? 'true' : 'false';
+    const filterCarriers = allCarriers.filter(e=>e.International === isInternational);
+    setCarriers(filterCarriers)
+
+  }
+  // input의 경우 string을 (e : string) 이렇게 받을 수 없고 아래 처럼 설정해주어야한다.
+  const blindNumber = (e : React.ChangeEvent<HTMLInputElement>) =>{
+    // 숫자 0~9까지숫자만 입력할 수 있게 설정.
+    const value = e.target.value
+    e.target.value = e.target.value.replace(/[^0-9]/g,'')
+    setTinvoice(value)
+  }
+
+
+  const PostSumbit = async ()=>{
+  
+    try{
+      const res = await fetch(`http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}`);
+      const data =  res.json();
+      console.log(data)
+    }catch(error){
+      console.log(error);
+    }
+
+
+    // http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=08&t_invoice=406332550175&t_key=nSY8t0ppGgkyTzE1cer4Vg
+      // http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}
+    //http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}
+    // const url = new URL(`http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}`)
+    // const url = new URL("http://info.sweettracker.co.kr/api/v1/trackingInfo");
+    // url.searchParams.append("t_code", tcode)
+    // url.searchParams.append("t_invoice", tinvoice)
+    // url.searchParams.append("t_key",` ${process.env.REACT_APP_API_KEY}`)
+    // console.log(url)
+  
+  }
 
   return (
     <>
-    <p>{themeColor[theme] && themeColor["blue"].back}</p>
-      <p className="text-green-400 bg-red-400 text-lg">Lorem ipsum dolor sit amet consectetur adipisicing elit. Deleniti hic ipsum in quas explicabo, minima perspiciatis, aliquam recusandae fugit temporibus placeat nesciunt magni ullam consectetur provident veritatis tenetur, ducimus esse illo ut dolore animi autem. Similique eaque magni deleniti, porro quibusdam optio neque quo, explicabo veritatis numquam minima suscipit omnis quas maxime voluptatibus quisquam tenetur impedit aliquam a nostrum et! Corrupti quis ad omnis molestiae, vero temporibus aut ipsa quos ea animi aliquam labore nesciunt! Qui fuga repudiandae velit modi, voluptatum saepe aperiam? Autem ullam et id iusto eligendi commodi? Itaque alias quisquam labore in id similique illum? Porro doloribus fugiat odit accusantium mollitia sit! Ratione ipsum nemo asperiores nobis ullam, et vero minima numquam, natus veniam quod dolore, incidunt iure? Itaque quis iste dicta, cum magni quas sed officia obcaecati eius aliquam corrupti sunt illum odit architecto, id exercitationem alias voluptate quo placeat neque? Quas ad aspernatur fugiat, similique porro sit blanditiis, animi, nulla voluptatum repudiandae inventore nostrum assumenda libero dolore ea sint non necessitatibus? Sint ipsum totam ducimus praesentium id dicta quidem? Provident eum vitae tempora nesciunt dolores nobis rerum voluptas molestiae nam repudiandae placeat, distinctio nihil ad id! Odit ipsam reiciendis dolorem architecto, quas cumque minima unde repudiandae iure illum. Quam maiores quis animi asperiores, excepturi aperiam quisquam, saepe quaerat impedit aspernatur nulla, voluptatum commodi eligendi? Illum ad soluta doloribus magnam porro vel consectetur quisquam ducimus, adipisci quaerat cumque fugiat similique beatae optio est vitae quam libero corrupti! Aspernatur accusantium natus praesentium rerum. Deserunt provident voluptate cupiditate neque corporis. Quod ratione debitis perspiciatis sunt. Vel omnis est aliquid cum alias laudantium, facere similique vitae explicabo nam animi ut totam adipisci ducimus nostrum dicta neque impedit veniam? Necessitatibus nihil modi perferendis praesentium id, fuga suscipit ut aperiam molestias officia dolorem reprehenderit ullam provident exercitationem velit repellat earum eaque error atque? Inventore corporis dolorem unde autem excepturi, animi similique blanditiis accusantium rem quisquam hic aliquam porro expedita iusto eius velit dolor at, quidem libero atque, ullam placeat asperiores eveniet mollitia. Nisi aperiam cum voluptates, itaque officia magni cupiditate odio in, veniam quas perferendis nostrum est at hic necessitatibus porro? Totam harum maiores corporis et sapiente tenetur iste odio distinctio quae nesciunt sequi accusantium, in quo pariatur iure vero voluptates. Consectetur nesciunt laborum deserunt rerum facilis quam provident impedit optio unde nemo ipsam, expedita necessitatibus dolor. Expedita aut sapiente, dolore nesciunt porro optio maxime? Voluptate nulla cumque, similique porro consectetur consequatur. Possimus, mollitia exercitationem reprehenderit ea ratione officia laboriosam laudantium beatae repellat autem ut debitis placeat unde nesciunt voluptatibus quaerat sunt voluptatem, natus eos et quod iure sequi tenetur delectus! In rem illo fugit possimus quia neque placeat, sit et nemo quasi corporis voluptatum praesentium facilis necessitatibus quas suscipit voluptas, provident vero nulla iusto repellat qui? Adipisci sequi, ipsum, pariatur aspernatur sapiente quam tenetur illum culpa voluptas nobis sunt aliquid quis. Numquam hic culpa cum quibusdam sint eum amet quasi atque consequuntur consectetur rerum iure sit, quam ipsam error minima labore iusto aliquam magni praesentium quas, explicabo consequatur, quod blanditiis.</p>
+
+      <div className={`p-5 text-black text-sm md:text-xl xl:text-2xl flex justify-between ${themeColor[theme].back}`}>
+        <h3 className="font-extrabold">국 내.외 택배조회 시스템</h3>
+        <div className="">
+          <span>테마: </span>
+          {
+            buttons.map((e, i) => {
+              return (
+                <button key={i} className="mx-1 md:mx-2 xl:mx-3" onClick={() => setTheme(e.theme)}>{e.name}</button>
+              )
+            })
+          }
+        </div>
+      </div>
+      <div className="w-4/5 md:w-3/5 xl:w-4/12 mx-auto my-40 flex rounded items-center pt-2 flex-wrap">
+      <div className="border-b basis-full py-2 px-2 flex justify-center items-center text-sm">
+        <span className="basis-[30%] text-center mr-5">국내/국외 선택</span>
+        <button className={`text-sm border p-1 px-5 rounded hover:text-white mr-4
+          ${isBtn === 1 ? 'text-white' : 'text-black '} ${themeColor[theme].hover}
+          ${isBtn === 1 ? themeColor[theme].active : ''}`}  onClick={()=> selectCode(1,'04', '대한통운')}>국내</button>
+        <button className={`text-sm border p-1 px-5 rounded hover:text-white  ${isBtn === 2 ? 'text-white' : 'text-black '} ${themeColor[theme].hover}
+          ${isBtn === 2 ? themeColor[theme].active : ''}`} onClick={()=> selectCode(2,'12', 'EMS')}>국외</button>
+      </div>
+      {/* {tcode} {tname} {tinvoice} */}
+      <div className="basis-full py-4 border-b">
+      <select className="w-full  border rounded-md p-2 " value={tcode} onChange={(e)=>{setTcode(e.target.value)}}>
+        {
+            carriers.map((e, i) => {
+              return (
+                <option  key={i} value={e.Code}>{e.Name}</option>
+              )
+            })
+          }
+      </select>
+      </div>
+      <div className="basis-full py-4 border-b text-center">
+        <input type="text"  onInput={blindNumber} placeholder="운송장 번호를 입력해주세요." className={`w-full border px-5 py-2 rounded-md ${themeColor[theme].outline}`}/>
+      </div>
+      <div className="basis-full border-b py-4 text-center">
+        <button onClick={PostSumbit} className={`${themeColor[theme].back} text-white px-5 py-2 rounded-md w-full`}>조회하기</button>
+      </div>
+      </div>
     </>
   );
 }

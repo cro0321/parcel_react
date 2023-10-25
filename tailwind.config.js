@@ -2,8 +2,6 @@
 module.exports = {
    content: ["./src/**/*.{js,tsx}"],
   theme: {
-    screens : {
-    },
     extend: {},
   },
   plugins: [],
