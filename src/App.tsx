@@ -81,7 +81,7 @@ function App() {
     
     const fetchData = async ()=>{
       try{
-        const res = await fetch(`http://info.sweettracker.co.kr/api/v1/companylist?t_key=${process.env.REACT_APP_API_KEY}`);
+        const res = await fetch(`https://info.sweettracker.co.kr/api/v1/companylist?t_key=${process.env.REACT_APP_API_KEY}`);
         const data = await res.json();
         setAllCarriers(data.Company)
         setCarriers(data.Company)
@@ -114,7 +114,7 @@ function App() {
   const PostSumbit = async ()=>{
   
     try{
-      const res = await fetch(`http://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}`);
+      const res = await fetch(`https://info.sweettracker.co.kr/api/v1/trackingInfo?t_code=${tcode}&t_invoice=${tinvoice}&t_key=${process.env.REACT_APP_API_KEY}`);
       const data =  res.json();
       console.log(data)
     }catch(error){
