@@ -385,7 +385,6 @@ function App() {
           <div className="bg-white py-5">
             {
               // 눌렀을때 데이터가 오기 때문에 없으면 에러나서 infoTracking 써줌
-            // 577875469033 택배
               infoTracking && infoTracking.trackingDetails.slice().reverse().map((e, i) => {
                 return (
                   <div className={`pl-20 py-5 relative group ${themeColor[theme].odd}`} key={i}>
