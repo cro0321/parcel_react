@@ -176,12 +176,6 @@ function App() {
     const value = e.target.value;
     console.log(tcode)
     const result = carriers.find((e)=> e.Code === tcode)
-
-
-    // if(isBtn === 1 || isBtn === null){
-    //   e.target.value = e.target.value.replace(/[^0-9]/g, '')
-
-    // }
 //국내 배송일때만 숫자만 쓰기 가능하게 하기 위해서 result.International === "false"
     if (result) {
       if(result.International === "false"){
